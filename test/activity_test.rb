@@ -47,3 +47,16 @@ context "a new activity type" do
     asserts("the text has been evaluated") { topic.text }.equals("a comment has been posted")
   end
 end
+
+
+context "an activity without params" do
+  setup do
+    Dam.activity :no_params do
+      action :post
+      author "bob"
+      some_param 123
+    end
+  end
+   topic.kind_of(Dam::ActivityType)
+   asserts("can be applied without params") { topic.apply }.kind_of(Dam::Activity)
+end

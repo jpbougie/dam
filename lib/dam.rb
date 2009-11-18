@@ -24,7 +24,15 @@ module Dam
   end
   
   def self.stream(name, &block)
-    Dam::Stream.register(name, Dam::Stream.new(name, &block))
+    definition = StreamDefinition.new
+    definition.instance_eval(&block)
+    
+    stream = if Stream.has_placeholder? name
+      TemplatedStream.new(name, definition)
+    else
+      Stream.new(name, definition)
+    end
+    Dam::Stream.register(name, stream)
   end
   
 end

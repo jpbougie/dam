@@ -62,7 +62,7 @@ module Dam
       self
     end
     
-    def apply(params)
+    def apply(params = {})
       context = Context.new(params)
       evaluated_attributes = {}
       @attributes.each_pair do |attribute, value| 
@@ -78,6 +78,11 @@ module Dam
   end
   
   class Activity
+    
+    def self.[](name)
+      Dam::ActivityType.lookup(name)
+    end
+    
     attr_accessor :id, :attributes
     def initialize(params = {})
       @attributes = params

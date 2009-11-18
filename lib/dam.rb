@@ -17,8 +17,14 @@ module Dam
     act.submit!
   end
   
-  def activity(name, &block)
-    Dam::ActivityType.register(name, Dam::ActivityType.new(name, &block))
+  def self.activity(name, &block)
+    act = Dam::ActivityType.new(name, &block)
+    Dam::ActivityType.register(name, act)
+    act
+  end
+  
+  def self.stream(name, &block)
+    Dam::Stream.register(name, Dam::Stream.new(name, &block))
   end
   
 end

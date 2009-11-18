@@ -74,7 +74,8 @@ module Dam
     end
     
     def apply(params)
-      holder = Struct.new(:params).new(:params => params)
+      holder = Struct.new(:params).new
+      holder.params = params
       attributes = {}
       [:subject, :action, :published, :text].each do |attribute| 
         result = eval_attribute(send(attribute), holder)

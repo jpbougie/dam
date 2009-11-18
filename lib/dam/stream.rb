@@ -21,6 +21,7 @@ module Dam
     def Stream.register(name, stream)
       @streams ||= {}
       @streams[name] = stream
+      stream
     end
     
     def Stream.all
@@ -89,6 +90,10 @@ module Dam
       @filters << args
     end
     
+    def filters
+      @filters
+    end
+    
     def params
       ParamsProxy
     end
@@ -130,8 +135,4 @@ module Dam
         @name.gsub(@regexp, "([^/:-]+)")
       end
   end
-end
-
-def stream(name, &block)
-  Dam::Stream.register(name, Dam::Stream.new(name, &block))
 end

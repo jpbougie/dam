@@ -24,8 +24,9 @@ begin
     gemspec.version = Dam::Version
  
     gemspec.add_dependency "redis"
-    gemspec.add_dependency "redis-namespace"
+    gemspec.add_dependency "yajl-ruby"
     gemspec.add_development_dependency "jeweler"
+    gemspec.add_development_dependency "riot"
   end
 rescue LoadError
   puts "Jeweler not available. Install it with: "

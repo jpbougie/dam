@@ -54,12 +54,22 @@ module Dam
     end
     
     def apply(params)
-      Stream.new(replace_placeholders(params), definition, :params => params)
+      if params.is_a? String
+        name = params
+        params = extract_params(name)
+      else
+        name = replace_placeholders(params)
+      end
+      Stream.new(name, @definition, :params => params)
     end
     
     def instances
       elems = Dam::Storage.database.keys("stream:" + @glob_pattern)
       elems.each {|elem| streams << apply(elem) }
+    end
+    
+    def matches? what
+      what =~ @regexp
     end
     
     private
@@ -73,8 +83,12 @@ module Dam
       name
     end
     
+    def extract_params(what)
+      Hash[*@placeholders.collect {|pat| pat[1..-1].to_sym}.zip(@regexp.match(what).captures).flatten]
+    end
+    
     def extract_placeholders!
-      @placeholders = @name.match(PLACEHOLDER_PATTERN).captures
+      @placeholders = @name.scan(PLACEHOLDER_PATTERN)
     end
     
     def make_glob_pattern!
@@ -84,16 +98,21 @@ module Dam
     end
     
     def make_regexp!
-      @regexp = @placeholders.inject(@name) do |name, placeholder|
+      @regexp = Regexp.new(@placeholders.inject(@name) do |name, placeholder|
         name.sub(placeholder, "([^/:-]+)")
-      end
+      end)
     end
   end
   
   class Stream
     def Stream.lookup(name)
       @streams ||= {}
-      @streams[name]
+      if @streams.has_key? name
+        @streams[name]
+      else
+        template = @streams.values.find {|stream| stream.respond_to?(:instances) && stream.matches?(name)  }
+        template.apply(name) if template
+      end
     end
     
     def Stream.[](name)
@@ -108,6 +127,10 @@ module Dam
     
     def Stream.has_placeholder? string
       string =~ PLACEHOLDER_PATTERN
+    end
+    
+    def Stream.all
+      @streams.values.collect {|stream| stream.respond_to?(:instances) ? stream.instances : stream }.flatten
     end
     
     
@@ -126,25 +149,36 @@ module Dam
     def filters
       @definition.filters
     end
+    
+    def all
+      Dam::Storage.get(self.name).collect do |json|
+        Activity.from_json json
+      end
+    end
+    
+    def first
+      Activity.from_json(Dam::Storage.head(self.name))
+    end
 
     def matches? activity
       filters.any? do |filter|
         return true if filter == :all
         
         filter.any? do |key, value|
-          attr_match(value, activity.attributes[key])
+          attr_match(value, activity.attributes[key.to_s])
         end
       end
     end
     
-    def instantiate(val)
-      Stream.new(@name, Hash[*self.patterns.zip(val.match(to_regexp).captures).flatten], &@block)
+    def instantiate!
+      ensure_exists!
+      self
     end
     
     private
     
     def ensure_exists!
-      if Dam::Storage.database.keys["stream:#{name}"].size == 0
+      if Dam::Storage.database.keys("stream:#{name}").size == 0
         Dam::Storage.database.push_head("stream:#{name}", 1)
         Dam::Storage.database.pop_head("stream:#{name}")
       end
@@ -156,10 +190,21 @@ module Dam
       
       if condition.respond_to? :each_pair
         condition.all? do |key, value|
-          (element.respond_to?(key) ? element.send(key) : element[key]) == (value.is_a?(ParamsProxy) ? @params[value.key] : value)
+          (element.respond_to?(key) ? element.send(key) : element[key]) == eval_arg(element)
         end
       else
-        condition == (element.is_a?(ParamsProxy) ? @params[element.key] : element)
+        condition == eval_arg(element)
+      end
+    end
+    
+    def eval_arg(arg)
+      case arg
+      when ParamsProxy
+        @params[arg.key]
+      when Proc
+        arg.call
+      else
+        arg
       end
     end
   end

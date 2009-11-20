@@ -2,6 +2,7 @@ require 'dam/activity'
 require 'dam/storage'
 require 'dam/stream'
 
+require 'yajl'
 
 module Dam
   

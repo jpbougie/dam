@@ -23,14 +23,14 @@ context "a new activity type" do
   asserts("is registered") { topic }.equals(Dam::ActivityType.lookup(:comment_posted))
   asserts("has a name") { topic.name }.equals(:comment_posted)
   
-  asserts("has a static author") { topic.attributes[:author] }.equals("Some Author")
-  asserts("has a static action") { topic.attributes[:action] }.equals(:post)
+  asserts("has a static author") { topic.attributes["author"] }.equals("Some Author")
+  asserts("has a static action") { topic.attributes["action"] }.equals(:post)
   
-  asserts("has a comment proc") { topic.attributes[:comment] }.kind_of(Proc)
-  asserts("has a project proc") { topic.attributes[:project] }.kind_of(Proc)
+  asserts("has a comment proc") { topic.attributes["comment"] }.kind_of(Proc)
+  asserts("has a project proc") { topic.attributes["project"] }.kind_of(Proc)
   
-  asserts("has a published proc") { topic.attributes[:published] }.kind_of(Proc)
-  asserts("has a text proc") { topic.attributes[:text] }.kind_of(Proc)
+  asserts("has a published proc") { topic.attributes["published"] }.kind_of(Proc)
+  asserts("has a text proc") { topic.attributes["text"] }.kind_of(Proc)
   
   context "can be instantiated" do
     setup do

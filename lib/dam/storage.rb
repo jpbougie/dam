@@ -18,13 +18,17 @@ module Dam
     def self.insert(stream, activity)
       key = stream.name
       
-      self.database.push_head("stream:#{key}", activity.to_db)
+      self.database.push_head("stream:#{key}", activity.to_json)
       self.database.ltrim("stream:#{key}", 0, (stream.limit || 10) - 1)
       
     end
     
     def self.get(stream_name)
-      self.database.list_range("stream:#{stream_name}", 0, -1).collect {|data| Dam::Activity.from_db(data) }
+      self.database.list_range("stream:#{stream_name}", 0, -1)
+    end
+    
+    def self.head(stream_name)
+      self.database.list_index("stream:#{stream_name}", 0)
     end
     
     private 

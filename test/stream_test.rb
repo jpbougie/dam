@@ -104,3 +104,16 @@ context "a parameterized stream" do
     asserts("matches a valid activity") { topic.matches? Dam::Activity[:comment].apply(:author => "bob") }
   end
 end
+
+context "a stream with a proc condition" do
+  setup do
+    Dam::Storage.clear!
+    Dam.stream :with_a_proc do
+      accepts :author => { "name" => Proc.new {|name| name.reverse == name} }
+    end
+  end
+  
+  topic.kind_of(Dam::Stream)
+  asserts("matches a valid activity") { topic.matches? Dam::Activity[:comment].apply(:author => "abcba") }
+  asserts("rejects an invalid activity") { !topic.matches? Dam::Activity[:comment].apply(:author => "not valid") }
+end

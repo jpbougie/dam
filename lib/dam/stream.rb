@@ -188,23 +188,23 @@ module Dam
       # match a nil element with a nil condition
       return condition.nil? if element.nil?
       
-      if condition.respond_to? :each_pair
+      if condition.respond_to? :each_pair # condition is a hash
         condition.all? do |key, value|
-          (element.respond_to?(key) ? element.send(key) : element[key]) == eval_arg(element)
+          eval_condition(value, element[key])
         end
       else
-        condition == eval_arg(element)
+        eval_condition(condition, element)
       end
     end
     
-    def eval_arg(arg)
+    def eval_condition(arg, val)
       case arg
       when ParamsProxy
-        @params[arg.key]
+        @params[arg.key] == val
       when Proc
-        arg.call
+        arg.call(val)
       else
-        arg
+        arg == val
       end
     end
   end

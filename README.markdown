@@ -31,15 +31,22 @@ Then declare streams that will accepts these activities
       accepts :action => "post", :author => {"name" => "bob"}
     end
   
-Finally, just post your activities
+Finally, just post your activities:
     Dam.post :comment_posted, :comment => my_comment
-  
+    
+And access the stream's activities using:
+    Dam::Stream[:activities_from_bob].all.each {|activity| puts activity.comment["excerpt"] }
+    
 Further possibilities
-
 =====================
+
 You can create _templated_ streams, that is, streams who first have to be instantiated to start receiving activities. To do this, use a route-like name, such as
 
     Dam.stream "project/:project" do
       limit 15
       accepts :project => {"id" => params[:project]}
     end
+
+You can then instantiate these projects to start receiving events
+
+    Dam::Stream["project/12345"].instantiate!

@@ -28,6 +28,8 @@ begin
     gemspec.add_development_dependency "jeweler"
     gemspec.add_development_dependency "riot"
   end
+  
+  Jeweler::GemcutterTasks.new
 rescue LoadError
   puts "Jeweler not available. Install it with: "
   puts "gem install jeweler"

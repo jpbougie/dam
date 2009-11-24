@@ -13,9 +13,11 @@ module Dam
   end
   
   def self.post(type, params = {})
-    act = Activity.new(Dam::ActivityType.lookup(type.to_sym), params)
+    act = Dam::ActivityType.lookup(type.to_sym).apply(params)
 
     act.post!
+    
+    act
   end
   
   def self.activity(name, &block)

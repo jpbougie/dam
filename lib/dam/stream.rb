@@ -65,7 +65,7 @@ module Dam
     
     def instances
       elems = Dam::Storage.database.keys("stream:" + @glob_pattern)
-      elems.each {|elem| streams << apply(elem) }
+      elems.collect {|elem| apply(elem) }
     end
     
     def matches? what

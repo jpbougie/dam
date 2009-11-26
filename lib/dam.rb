@@ -7,9 +7,7 @@ require 'yajl'
 module Dam
   
   def self.push(activity)
-    Dam::Stream.all.select {|stream| stream.matches? activity }.each do |stream|
-      Dam::Storage.insert(stream, activity)
-    end
+    Dam::Storage.insert(activity, Dam::Stream.all.select {|stream| stream.matches? activity })
   end
   
   def self.post(type, params = {})

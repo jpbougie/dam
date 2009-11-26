@@ -64,7 +64,7 @@ module Dam
     end
     
     def instances
-      elems = Dam::Storage.database.keys("stream:" + @glob_pattern)
+      elems = Dam::Storage.keys(@glob_pattern)
       elems.collect {|elem| apply(elem) }
     end
     

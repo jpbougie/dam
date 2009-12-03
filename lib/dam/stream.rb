@@ -162,7 +162,7 @@ module Dam
 
     def matches? activity
       filters.any? do |filter|
-        return true if filter == :all
+        return true if filter == :all || filter == activity.type.name
         
         filter.any? do |key, value|
           attr_match(value, activity.attributes[key.to_s])
